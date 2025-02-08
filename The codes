@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <time.h>
+
+/*Epoch Time, bilgisayar sistemlerinde zamanı temsil etmek için kullanılan bir yöntemdir. 
+1 Ocak 1970, 00:00:00 UTC (Eşgüdümlü Evrensel Zaman) tarihinden itibaren geçen saniye sayısını ifade eder.
+Buna Unix Zamanı da denir çünkü ilk olarak Unix tabanlı işletim sistemlerinde kullanılmıştır.*/
+
+// Tarih ve saat bilgisini saklayan struct
+struct TarihSaat {
+    int yil, ay, gun, saat, dakika, saniye;
+};
+
+// Epoch zamanını saklayan union
+union EpochZaman {
+    time_t epoch;
+};
+
+// Kullanıcıdan tarih bilgisi alan fonksiyon
+void tarihSaatAl(struct TarihSaat *ts) {
+    printf("Yil: ");
+    scanf("%d", &ts->yil);
+    printf("Ay: ");
+    scanf("%d", &ts->ay);
+    printf("Gun: ");
+    scanf("%d", &ts->gun);
+    printf("Saat: ");
+    scanf("%d", &ts->saat);
+    printf("Dakika: ");
+    scanf("%d", &ts->dakika);
+    printf("Saniye: ");
+    scanf("%d", &ts->saniye);
+}
+
+// struct TarihSaat'ten epoch zamanına çeviren fonksiyon
+time_t epochCevir(struct TarihSaat ts) {
+    struct tm zamanBilgi = {0};
+    zamanBilgi.tm_year = ts.yil - 1900;
+    zamanBilgi.tm_mon = ts.ay - 1;
+    zamanBilgi.tm_mday = ts.gun;
+    zamanBilgi.tm_hour = ts.saat;
+    zamanBilgi.tm_min = ts.dakika;
+    zamanBilgi.tm_sec = ts.saniye;
+    return mktime(&zamanBilgi);
+}
+
+int main() {
+    struct TarihSaat ts1, ts2;
+    union EpochZaman epoch1, epoch2;
+    
+    printf("Birinci tarih ve saat bilgilerini giriniz:\n");
+    tarihSaatAl(&ts1);
+    
+    printf("\nIkinci tarih ve saat bilgilerini giriniz:\n");
+    tarihSaatAl(&ts2);
+    
+    // Epoch zamanlarına çevirme
+    epoch1.epoch = epochCevir(ts1);
+    epoch2.epoch = epochCevir(ts2);
+    
+    if (epoch1.epoch == -1 || epoch2.epoch == -1) {
+        printf("Hata: Epoch zamani hesaplanamadi!\n");
+        return 1;
+    }
+    
+    // Zaman farkını hesapla
+    double fark = difftime(epoch2.epoch, epoch1.epoch);
+    
+    printf("\nBirinci tarih icin epoch zamani: %ld\n", epoch1.epoch);
+    printf("Ikinci tarih icin epoch zamani: %ld\n", epoch2.epoch);
+    printf("Iki tarih arasindaki fark: %.0f saniye (%.2f saat)\n", fark, fark / 3600.0);
+    
+    return 0;
+}
